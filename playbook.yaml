@@ -1,0 +1,53 @@
+---
+- name: install Docker
+  hosts: myserver
+  become: true
+  tasks:
+    # following the steps https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl 
+          - gnupg
+          - lsb-release
+        state: latest
+        update_cache: true
+
+    - name: Add signing key
+      ansible.builtin.apt_key:
+        url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+        state: present
+        keyring: /etc/apt/keyrings/docker.gpg
+
+    - name: Add repository into sources list
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/{{ ansible_distribution | lower }}   {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Install Docker and Compose
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: latest
+        update_cache: true
+  
+    # Copy docker-compose manifest
+    - name: Copy file with owner and permissions
+      ansible.builtin.copy:
+        src: ./docker-compose.yaml
+        dest: /root/docker-compose.yaml
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Start Docker Compose Manifest
+      ansible.builtin.shell: |
+        docker compose down
+        docker compose up --detach
+      args:
+        chdir: /root
