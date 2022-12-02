@@ -23,7 +23,7 @@
       "ping": "pong"
   }
   ```
-- Edit the `docker-compose.yaml` file and run the playbook
+- Copy `docker-compose.example.yaml` file and create `docker-compose.yaml`, then run the playbook
   `ansible-playbook -i ./inventory.ini ./playbook.yaml`
 - Check everything works by visiting the configured host/port, in the example it should be
   - 10.0.10.25:8080
